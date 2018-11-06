@@ -1,5 +1,6 @@
 from messaging_abstract.component import *
 from .dispatch import *
+import logging
 
 
 class RouterFactory(object):
@@ -16,4 +17,6 @@ class RouterFactory(object):
             name = '%s-%s-%s' % ('router', router.__name__, node.hostname)
             return router(name=name, node=node, executor=executor, service=service_impl, **kwargs)
 
-        raise ValueError('Invalid router implementation: %s' % implementation)
+        exception = ValueError('Invalid router implementation: %s' % implementation)
+        logging.getLogger(RouterFactory.__module__).error(exception)
+        raise exception

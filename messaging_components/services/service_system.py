@@ -1,4 +1,5 @@
 import re
+import logging
 from enum import Enum
 from iqa_common.executor import Command, Execution, ExecutorAnsible, CommandAnsible
 from messaging_abstract.component import Service, ServiceStatus
@@ -8,6 +9,8 @@ class ServiceSystem(Service):
     """
     Implementation of a systemd or initd service used to manage a Server component.
     """
+
+    _logger = logging.getLogger(__name__)
 
     class ServiceSystemState(Enum):
         STARTED = ('start', 'started')
@@ -39,15 +42,19 @@ class ServiceSystem(Service):
         execution = self.executor.execute(cmd_status)
 
         if not execution.read_stdout():
+            ServiceSystem._logger.debug("Service: %s - Status: FAILED" % self.name)
             return ServiceStatus.FAILED
 
         service_output = execution.read_stdout()
 
         if re.search('(is running|\(running\))', service_output):
+            ServiceSystem._logger.debug("Service: %s - Status: RUNNING" % self.name)
             return ServiceStatus.RUNNING
         elif re.search('(is stopped|\(dead\))', service_output):
+            ServiceSystem._logger.debug("Service: %s - Status: STOPPED" % self.name)
             return ServiceStatus.STOPPED
 
+        ServiceSystem._logger.debug("Service: %s - Status: UNKNOWN" % self.name)
         return ServiceStatus.UNKNOWN
 
     def start(self) -> Execution:

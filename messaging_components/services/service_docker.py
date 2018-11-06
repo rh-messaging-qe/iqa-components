@@ -12,6 +12,8 @@ class ServiceDocker(Service):
     docker container name.
     """
 
+    _logger = logging.getLogger(__name__)
+
     class ServiceDockerState(Enum):
         STARTED = ('start', 'started')
         STOPPED = ('stop', 'stopped')
@@ -30,14 +32,17 @@ class ServiceDocker(Service):
         try:
             container = DockerUtil.get_container(self.name)
             if not container:
+                ServiceDocker._logger.debug("Service: %s - Status: UNKNOWN" % self.name)
                 return ServiceStatus.UNKNOWN
 
             if container.status == 'running':
+                ServiceDocker._logger.debug("Service: %s - Status: RUNNING" % self.name)
                 return ServiceStatus.RUNNING
             elif container.status == 'exited':
+                ServiceDocker._logger.debug("Service: %s - Status: STOPPED" % self.name)
                 return ServiceStatus.STOPPED
         except Exception:
-            logging.exception('Error retrieving status of docker container')
+            ServiceDocker._logger.exception('Error retrieving status of docker container')
             return ServiceStatus.FAILED
 
         return ServiceStatus.UNKNOWN

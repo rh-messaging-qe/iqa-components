@@ -3,6 +3,7 @@ from messaging_components.clients.external.client_external import ClientExternal
 from .nodejs import *
 from .python import *
 from .java import *
+import logging
 
 
 class ClientFactory(object):
@@ -27,7 +28,9 @@ class ClientFactory(object):
 
             return clients
 
-        raise ValueError('Invalid client implementation')
+        exception = ValueError('Invalid client implementation: %s' % implementation)
+        logging.getLogger(ClientFactory.__module__).error(exception)
+        raise exception
 
     @staticmethod
     def get_available_implementations() -> list:

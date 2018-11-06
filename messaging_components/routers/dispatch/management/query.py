@@ -5,6 +5,7 @@ from messaging_abstract.component import Router
 from proton import Url, SSLDomain
 from proton.utils import BlockingConnection, SyncRequestResponse
 import proton
+import logging
 
 
 class RouterQuery(object):
@@ -14,6 +15,7 @@ class RouterQuery(object):
     """
     def __init__(self, host="0.0.0.0", port=5672, router: Router=None):
 
+        self._logger = logging.getLogger(self.__module__)
         self.port = port
         self.host = host
         self._router = router
@@ -58,8 +60,10 @@ class RouterQuery(object):
 
         # URL to test
         url = Url("%s://%s:%s/$management" % (scheme, self.host, self.port))
+        self._logger.info("Querying router at: %s://%s:%s/$management" % (scheme, self.host, self.port))
 
         # Proton connection
+        self._logger.debug("Connection options: %s" % self._connection_options)
         connection = BlockingConnection(url, **self._connection_options)
 
         # Proton sync client
