@@ -1,7 +1,7 @@
 # Messaging Components (messaging_components)
 
 ## Description
-Messaging components is based on Abstract Messaging of Middleware.
+Messaging components module is based on Abstract Messaging of Middleware [messaging_abstract](https://github.com/rh-messaging-qe/messaging_abstract).
 
 # Objectives
 - Brokers, Clients.. using "common API" -> AMOM
