@@ -77,12 +77,15 @@ class ServiceDummyBroker(Service):
     def start_and_wait(self, wait_for_messaging):
         execution = self.executor.execute(self._create_command(self.ServiceSystemState.STARTED))
         self._wait_for_messaging(wait_for_messaging)
+        return execution
 
     def stop(self) -> Execution:
         return self.executor.execute(self._create_command(self.ServiceSystemState.STOPPED))
 
-    def restart(self) -> Execution:
-        return self.executor.execute(self._create_command(self.ServiceSystemState.RESTARTED))
+    def restart(self, wait_for_messaging) -> Execution:
+        execution = self.executor.execute(self._create_command(self.ServiceSystemState.RESTARTED))
+        self._wait_for_messaging(wait_for_messaging)
+        return execution
 
     def _wait_for_messaging(self, messaging_wait=False):
         # Wait until broker web port is available
@@ -98,11 +101,11 @@ class ServiceDummyBroker(Service):
             if attempt == ServiceDummyBroker.MAX_ATTEMPTS - 1:
                 print("     broker is not reachable after %d attempts" % ServiceDummyBroker.MAX_ATTEMPTS)
 
-            if TcpUtil.is_tcp_port_available(port, host):
+            if TcpUtil.is_tcp_port_available(int(port), host):
                 return True
 
             time.sleep(ServiceDummyBroker.DELAY)
-        ServiceDummyBroker._logger.info("Unable to connect to hostname:port: %s:%s" % (host, port))
+        ServiceDummyBroker._logger.warning("Unable to connect to hostname:port: %s:%s" % (host, port))
         return False
 
     def _create_command(self, service_state: ServiceSystemState):
